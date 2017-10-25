@@ -1,3 +1,3 @@
 # personal-website
 
-My repo for my li'l [personal website](nickyannacone.com).
+My repo for my li'l [personal website](http://nickyannacone.com).
