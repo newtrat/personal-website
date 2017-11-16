@@ -1,0 +1,12 @@
+body {
+  background-color: black;
+  color: white;
+  font-family: 'Georgia', sans-serif;
+  padding: 2rem;
+}
+
+.links-container {
+  position: fixed;
+  right: 2rem;
+  top: 2rem;
+}
