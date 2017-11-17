@@ -1,12 +1,9 @@
 body {
   background-color: black;
   color: white;
+  display: flex;
   font-family: 'Georgia', sans-serif;
+  justify-content: space-between;
   padding: 2rem;
-}
-
-.links-container {
-  position: fixed;
-  right: 2rem;
-  top: 2rem;
+  position: relative;
 }
