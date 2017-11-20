@@ -7,3 +7,7 @@ body {
   padding: 2rem;
   position: relative;
 }
+
+#paddle-game {
+  border: 2px solid #ffae00;
+}
