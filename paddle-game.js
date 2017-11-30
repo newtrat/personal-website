@@ -1,6 +1,15 @@
 "use strict";
 
-(function() {
+(function main() {
+  const GLOBAL_NAMES = ['Point', 'Rectangle', 'Sides'];
+  // Wait for globals to be ready, since I still can't use modules without
+  // Webpack et al.
+  if (!myGlobals ||
+      GLOBAL_NAMES.filter(prop => !myGlobals[prop]).length > 0) {
+    setTimeout(main, 100);
+    return;
+  }
+
   const BALL_RADIUS = 10;
   const CANVAS_WIDTH = 1500;
   const CANVAS_HEIGHT = 600;
