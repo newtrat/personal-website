@@ -99,7 +99,6 @@
   function moveBall() {
     ball.move(ballVX, ballVY);
     nonBallRectangles.forEach(rect => {
-      console.log(rect, ball.overlapSideWith(rect));
       switch (ball.overlapSideWith(rect)) {
       case myGlobals.Sides.TOP:
         ballVY = Math.abs(ballVY);
