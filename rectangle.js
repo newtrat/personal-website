@@ -1,6 +1,6 @@
 "use strict";
 
-myGlobals = myGlobals || {}
+window.myGlobals = window.myGlobals || {}
 
 myGlobals.Point = class Point {
   constructor(x, y) {
@@ -25,6 +25,7 @@ myGlobals.Rectangle = class Rectangle {
    * @param {Point} corner
    * @param {number} width
    * @param {number} height
+   * @param {CanvasRenderingContext2D} context
    */
   constructor(corner, width, height) {
     this.topLeftCorner = corner;
@@ -63,6 +64,24 @@ myGlobals.Rectangle = class Rectangle {
   }
 
   /**
+   * Remove this rectangle from the canvas.
+   * @param {CanvasRenderingContext2D} c
+   */
+  clear(c) {
+    c.clearRect(this.topLeftCorner.x, this.topLeftCorner.y,
+                this.width, this.height);
+  }
+
+  /**
+   * Draw this rectangle on the canvas.
+   * @param {CanvasRenderingContext2D} c
+   */
+  draw(c) {
+    c.fillRect(this.topLeftCorner.x, this.topLeftCorner.y,
+               this.width, this.height);
+  }
+
+  /**
    * Attempt to move this rectangle in the directions indicated by dx and dy
    * (e.g., if dx is 1 and dy is -2, move this rectangle 1 unit right and 2
    * units up). However, if canvasWidth and canvasHeight are provided, then
@@ -76,14 +95,18 @@ myGlobals.Rectangle = class Rectangle {
   move(dx, dy, canvasWidth, canvasHeight) {
     const currentX = this.topLeftCorner.x;
     const currentY = this.topLeftCorner.y;
-    let highestX = Number.MAX_SAFE_INTEGER;
-    let highestY = Number.MAX_SAFE_INTEGER;
-    if (canvasWidth && canvasHeight) {
-      highestX = canvasWidth - this.width;
-      highestY = canvasHeight - this.height;
+    if (!canvasWidth || !canvasHeight) {
+      this.topLeftCorner = new myGlobals.Point(
+        currentX + dx,
+        currentY + dy
+      );
+      return;
     }
+  
+    const highestX = canvasWidth - this.width;
+    const highestY = canvasHeight - this.height;
 
-    this.topLeftCorner = new Point(
+    this.topLeftCorner = new myGlobals.Point(
       Math.min(highestX, Math.max(0, currentX + dx)),
       Math.min(highestY, Math.max(0, currentY + dy))
     );
@@ -109,25 +132,29 @@ myGlobals.Rectangle = class Rectangle {
    * @return {Side}
    */
   overlapSideWith(other) {
-    const Sides = myGlobals.Sides;
     if (!this.overlaps(other)) {
-      return Sides.NONE;
+      return myGlobals.Sides.NONE;
     }
 
-    const topScore = this.topY() - other.topY();
-    const bottomScore = other.bottomY() - this.bottomY();
-    const leftScore = this.leftX() - other.leftX();
-    const rightScore = other.rightX() - this.rightX();
-
-    switch (Math.max(topScore, bottomScore, leftScore, rightScore)) {
-    case topScore:
-      return Sides.TOP;
-    case bottomScore:
-      return Sides.BOTTOM;
-    case leftScore:
-      return Sides.LEFT;
-    case rightScore:
-      return Sides.RIGHT;
+    if (this.topY() <= other.topY() &&
+        other.topY() <= this.bottomY() &&
+        this.bottomY() <= other.bottomY()) {
+      return myGlobals.Sides.BOTTOM;
+    } else if (other.topY() <= this.topY() &&
+               this.topY() <= other.bottomY() &&
+               other.bottomY() <= this.bottomY()) {
+      return myGlobals.Sides.TOP;
+    } else if (other.leftX() <= this.leftX() &&
+               this.leftX() <= other.rightX() &&
+               other.rightX() <= this.rightX()) {
+      return myGlobals.Sides.LEFT;
+    } else if (this.leftX() <= other.leftX() &&
+               other.leftX() <= this.rightX() &&
+               this.rightX() <= other.rightX()) {
+      return myGlobals.Sides.RIGHT;
     }
+    // The two rectangles overlap, but one is entirely contained within the
+    // other, so we just pretend that they don't
+    return myGlobals.Sides.NONE;
   }
 }

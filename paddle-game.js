@@ -4,7 +4,7 @@
   const GLOBAL_NAMES = ['Point', 'Rectangle', 'Sides'];
   // Wait for globals to be ready, since I still can't use modules without
   // Webpack et al.
-  if (!myGlobals ||
+  if (!window.myGlobals ||
       GLOBAL_NAMES.filter(prop => !myGlobals[prop]).length > 0) {
     setTimeout(main, 100);
     return;
@@ -19,24 +19,50 @@
   const PADDLE_HEIGHT = 25;
   const ORANGE = 'rgb(255, 174, 0)';
 
-  let ballX = BALL_RADIUS;
-  let ballY = BALL_RADIUS;
+  // Rectangles representing the sides of the canvas, so we can use collision
+  // detection to bounce the ball off the sides of the canvas.
+  const CANVAS_SIDES = [
+    new myGlobals.Rectangle(
+      new myGlobals.Point(-10, 0),
+      10,
+      CANVAS_HEIGHT
+    ),
+    new myGlobals.Rectangle(
+      new myGlobals.Point(CANVAS_WIDTH, 0),
+      10,
+      CANVAS_HEIGHT
+    ),
+    new myGlobals.Rectangle(
+      new myGlobals.Point(0, -10),
+      CANVAS_WIDTH,
+      10
+    ),
+    new myGlobals.Rectangle(
+      new myGlobals.Point(0, CANVAS_HEIGHT),
+      CANVAS_WIDTH,
+      10
+    )
+  ];
+
   let ballVX = 2;
   let ballVY = 2;
-  let paddleX = 700;
   let leftArrowDown = false;
   let rightArrowDown = false;
+  const ball = new myGlobals.Rectangle(
+    new myGlobals.Point(0, 0),
+    BALL_RADIUS * 2,
+    BALL_RADIUS * 2
+  );
+  const paddle = new myGlobals.Rectangle(
+    new myGlobals.Point((CANVAS_WIDTH - PADDLE_WIDTH) / 2, PADDLE_Y),
+    PADDLE_WIDTH,
+    PADDLE_HEIGHT
+  )
+  const nonBallRectangles = CANVAS_SIDES.concat([paddle]);
 
   const canvas = document.getElementById('paddle-game');
   const c = canvas.getContext('2d');
-
-  function ballRect() {
-    return [ballX - BALL_RADIUS, ballY - BALL_RADIUS, BALL_RADIUS * 2, BALL_RADIUS * 2];
-  }
-
-  function paddleRect() {
-    return [paddleX, PADDLE_Y, PADDLE_WIDTH, PADDLE_HEIGHT];
-  }
+  c.fillStyle = ORANGE;
 
   function registerKeydown(event) {
     switch (event.key) {
@@ -64,45 +90,44 @@
 
   function movePaddle() {
     if (leftArrowDown) {
-      paddleX = Math.max(0, paddleX - PADDLE_VEL);
+      paddle.move(-PADDLE_VEL, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     } else if (rightArrowDown) {
-      paddleX = Math.min(CANVAS_WIDTH - PADDLE_WIDTH, paddleX + PADDLE_VEL);
+      paddle.move(PADDLE_VEL, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     }
   }
 
   function moveBall() {
-    let newX = ballX + ballVX;
-    let newY = ballY + ballVY;
-    if (newX < BALL_RADIUS) {
-      newX = 2 * BALL_RADIUS - newX;
-      ballVX *= -1;
-    } else if (newX > CANVAS_WIDTH - BALL_RADIUS) {
-      newX = 2 * (CANVAS_WIDTH - BALL_RADIUS) - newX;
-      ballVX *= -1;
-    }
-    if (newY < BALL_RADIUS) {
-      newY = 2 * BALL_RADIUS - newY;
-      ballVY *= -1;
-    } else if (newY > CANVAS_HEIGHT - BALL_RADIUS) {
-      newY = 2 * (CANVAS_HEIGHT - BALL_RADIUS) - newY;
-      ballVY *= -1;
-    }
-    ballX = newX;
-    ballY = newY;
+    ball.move(ballVX, ballVY);
+    nonBallRectangles.forEach(rect => {
+      console.log(rect, ball.overlapSideWith(rect));
+      switch (ball.overlapSideWith(rect)) {
+      case myGlobals.Sides.TOP:
+        ballVY = Math.abs(ballVY);
+        ball.move(0, 2 * ballVY);
+        break;
+      case myGlobals.Sides.BOTTOM:
+        ballVY = -Math.abs(ballVY);
+        ball.move(0, 2 * ballVY);
+        break;
+      case myGlobals.Sides.LEFT:
+        ballVX = Math.abs(ballVX);
+        ball.move(2 * ballVX, 0);
+        break;
+      case myGlobals.Sides.RIGHT:
+        ballVX = -Math.abs(ballVX);
+        ball.move(2 * ballVX, 0);
+        break;
+      }
+    });
   }
 
   function tick() {
-    c.clearRect(...ballRect());
-    c.clearRect(...paddleRect());
+    c.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
     movePaddle();
     moveBall();
-    c.fillRect(...ballRect());
-    c.fillRect(...paddleRect());
+    ball.draw(c);
+    paddle.draw(c);
   }
-
-  c.fillStyle = ORANGE;
-  c.fillRect(...ballRect());
-  c.fillRect(...paddleRect());
 
   const mainLoopInterval = setInterval(tick, 1);
 
