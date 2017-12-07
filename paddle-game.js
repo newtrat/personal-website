@@ -11,7 +11,7 @@
   }
 
   const BALL_RADIUS = 10;
-  const CANVAS_WIDTH = 1500;
+  const CANVAS_WIDTH = 1000;
   const CANVAS_HEIGHT = 600;
   const PADDLE_Y = 550;
   const PADDLE_VEL = 3;
@@ -44,12 +44,73 @@
     )
   ];
 
+  const BRICK_CORNERS = [
+    [50, 50],
+    [50, 75],
+    [50, 100],
+    [50, 125],
+    [50, 150],
+    [50, 175],
+    [50, 200],
+    [50, 225],
+    [50, 250],
+    [100, 50],
+    [100, 75],
+    [150, 75],
+    [150, 100],
+    [200, 100],
+    [200, 125],
+    [200, 150],
+    [250, 150],
+    [250, 175],
+    [250, 200],
+    [300, 200],
+    [300, 225],
+    [350, 225],
+    [350, 250],
+    [400, 250],
+    [400, 225],
+    [400, 200],
+    [400, 175],
+    [400, 150],
+    [400, 125],
+    [400, 100],
+    [400, 75],
+    [400, 50],
+
+    [500, 50],
+    [500, 75],
+    [550, 75],
+    [550, 100],
+    [600, 100],
+    [600, 125],
+    [600, 150],
+    [600, 175],
+    [600, 200],
+    [600, 225],
+    [600, 250],
+    [650, 100],
+    [650, 75],
+    [700, 75],
+    [700, 50]
+
+  ];
+  const BRICK_WIDTH = 50;
+  const BRICK_HEIGHT = 25;
+  const bricks = BRICK_CORNERS.map(orderedPair =>
+    new myGlobals.Brick(
+      new myGlobals.Point(...orderedPair),
+      BRICK_WIDTH,
+      BRICK_HEIGHT
+    )
+  );
+
   let ballVX = 2;
   let ballVY = 2;
   let leftArrowDown = false;
   let rightArrowDown = false;
   const ball = new myGlobals.Rectangle(
-    new myGlobals.Point(0, 0),
+    new myGlobals.Point(500, 300),
     BALL_RADIUS * 2,
     BALL_RADIUS * 2
   );
@@ -58,7 +119,7 @@
     PADDLE_WIDTH,
     PADDLE_HEIGHT
   )
-  const nonBallRectangles = CANVAS_SIDES.concat([paddle]);
+  const specialRectangles = CANVAS_SIDES.concat(bricks).concat([paddle]);
 
   const canvas = document.getElementById('paddle-game');
   const c = canvas.getContext('2d');
@@ -98,24 +159,29 @@
 
   function moveBall() {
     ball.move(ballVX, ballVY);
-    nonBallRectangles.forEach(rect => {
-      switch (ball.overlapSideWith(rect)) {
-      case myGlobals.Sides.TOP:
+    specialRectangles.forEach(rect => {
+      const overlapSide = rect.overlapSideWith(ball);
+      switch (overlapSide) {
+      case myGlobals.Sides.BOTTOM:
         ballVY = Math.abs(ballVY);
         ball.move(0, 2 * ballVY);
         break;
-      case myGlobals.Sides.BOTTOM:
+      case myGlobals.Sides.TOP:
         ballVY = -Math.abs(ballVY);
         ball.move(0, 2 * ballVY);
         break;
-      case myGlobals.Sides.LEFT:
+      case myGlobals.Sides.RIGHT:
         ballVX = Math.abs(ballVX);
         ball.move(2 * ballVX, 0);
         break;
-      case myGlobals.Sides.RIGHT:
+      case myGlobals.Sides.LEFT:
         ballVX = -Math.abs(ballVX);
         ball.move(2 * ballVX, 0);
         break;
+      }
+      if (overlapSide !== myGlobals.Sides.NONE &&
+          rect.constructor === myGlobals.Brick) {
+        rect.deactivate();
       }
     });
   }
@@ -126,9 +192,10 @@
     moveBall();
     ball.draw(c);
     paddle.draw(c);
+    bricks.forEach(brick => brick.draw(c));
   }
 
-  const mainLoopInterval = setInterval(tick, 1);
+  setInterval(tick, 1);
 
   const body = document.getElementsByTagName('body')[0];
   body.addEventListener('keydown', registerKeydown);

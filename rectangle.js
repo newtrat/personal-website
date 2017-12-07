@@ -158,3 +158,40 @@ myGlobals.Rectangle = class Rectangle {
     return myGlobals.Sides.NONE;
   }
 }
+
+/**
+ * Bricks are rectangles which can be destroyed. They start out in an 'active'
+ * state, but switch to being 'inactive' (essentially nonexistent) once they
+ * are destroyed.
+ */
+myGlobals.Brick = class Brick extends myGlobals.Rectangle {
+  constructor(corner, width, height) {
+    super(corner, width, height);
+    this.active = true;
+  }
+
+  /**
+   * "Destroy" this brick by preventing it from overlapping with
+   * anything.
+   */
+  deactivate() {
+    this.active = false;
+  }
+
+  /** @override */
+  draw(c) {
+    if (this.active) {
+      super.draw(c);
+    }
+  }
+
+  /** @override */
+  overlaps(other) {
+    return this.active ? super.overlaps(other) : false;
+  }
+
+  /** @override */
+  overlapSideWith(other) {
+    return this.active ? super.overlapSideWith(other) : myGlobals.Sides.NONE;
+  }
+}
