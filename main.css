@@ -1,5 +1,5 @@
 body {
-  background-color: black;
+  background-color: #884747;
   color: white;
   display: flex;
   font-family: 'Georgia', sans-serif;
@@ -8,6 +8,27 @@ body {
   position: relative;
 }
 
+.links h2 {
+  text-align: center;
+}
+
 #paddle-game {
   border: 2px solid #ffae00;
+}
+
+@media (max-width: 600px) {
+  body {
+    display: block;
+    font-size: large;
+    text-align: center;
+  }
+
+  .links svg {
+    display: block;
+    margin: 0 auto;
+  }
+
+  #paddle-game {
+    display: none;
+  }
 }
