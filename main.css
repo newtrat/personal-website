@@ -3,6 +3,7 @@ body {
   color: white;
   display: flex;
   font-family: 'Georgia', sans-serif;
+  font-size: large;
   justify-content: space-between;
   padding: 2rem;
   position: relative;
@@ -19,7 +20,6 @@ body {
 @media (max-width: 600px) {
   body {
     display: block;
-    font-size: large;
     text-align: center;
   }
 
