@@ -9,12 +9,20 @@ body {
   position: relative;
 }
 
+a {
+  color: #ffae00;
+}
+
 .links h2 {
   text-align: center;
 }
 
 #paddle-game {
   border: 2px solid #ffae00;
+}
+
+ul {
+  list-style-type: none;
 }
 
 @media (max-width: 600px) {
